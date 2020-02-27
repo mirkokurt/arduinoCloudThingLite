@@ -87,6 +87,7 @@ class ArduinoCloudThing {
     String getPropertyNameByIdentifier(int propertyIdentifier);
 
     void readProperties(bool isSyncMessage = false);
+    void writeProperties(bool isSyncMessage = false);
 
   private:
     LinkedList<ArduinoCloudProperty *>   _property_list;
