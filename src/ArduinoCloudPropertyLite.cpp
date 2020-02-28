@@ -15,7 +15,7 @@
 // a commercial license, send an email to license@arduino.cc.
 //
 
-#include "ArduinoCloudProperty.h"
+#include "ArduinoCloudPropertyLite.h"
 
 #ifdef ARDUINO_ARCH_SAMD
   #include <RTCZero.h>
@@ -34,7 +34,7 @@ static unsigned long getTimestamp() {
 /******************************************************************************
    CTOR/DTOR
  ******************************************************************************/
-ArduinoCloudProperty::ArduinoCloudProperty()
+ArduinoCloudPropertyLite::ArduinoCloudPropertyLite()
   :   _name(""),
       _min_delta_property(0.0f),
       _min_time_between_updates_millis(0),
@@ -55,76 +55,84 @@ ArduinoCloudProperty::ArduinoCloudProperty()
 /******************************************************************************
    PUBLIC MEMBER FUNCTIONS
  ******************************************************************************/
-void ArduinoCloudProperty::init(String const name, Permission const permission) {
+void ArduinoCloudPropertyLite::init(String const name, Permission const permission) {
   _name = name;
   _permission = permission;
 }
 
-ArduinoCloudProperty & ArduinoCloudProperty::onUpdate(UpdateCallbackFunc func) {
+ArduinoCloudPropertyLite & ArduinoCloudPropertyLite::onUpdate(UpdateCallbackFunc func) {
   _update_callback_func = func;
   return (*this);
 }
 
-ArduinoCloudProperty & ArduinoCloudProperty::onSync(SyncCallbackFunc func) {
+ArduinoCloudPropertyLite & ArduinoCloudPropertyLite::onSync(SyncCallbackFunc func) {
   _sync_callback_func = func;
   return (*this);
 }
 
-ArduinoCloudProperty & ArduinoCloudProperty::publishOnChange(float const min_delta_property, unsigned long const min_time_between_updates_millis) {
+ArduinoCloudPropertyLite & ArduinoCloudPropertyLite::publishOnChange(float const min_delta_property, unsigned long const min_time_between_updates_millis) {
   _update_policy = UpdatePolicy::OnChange;
   _min_delta_property = min_delta_property;
   _min_time_between_updates_millis = min_time_between_updates_millis;
   return (*this);
 }
 
-ArduinoCloudProperty & ArduinoCloudProperty::publishEvery(unsigned long const seconds) {
+ArduinoCloudPropertyLite & ArduinoCloudPropertyLite::publishEvery(unsigned long const seconds) {
   _update_policy = UpdatePolicy::TimeInterval;
   _update_interval_millis = (seconds * 1000);
   return (*this);
 }
 
-void ArduinoCloudProperty::iotReadProperty(){
+void ArduinoCloudPropertyLite::iotReadProperty(){
   iotReadProperty();
 }
 
-void ArduinoCloudProperty::iotReadPropertyReal(bool& value, String attributeName) {
-value = WiFi.iotReadPropertyBool(attributeName.c_str());
+void ArduinoCloudPropertyLite::iotReadPropertyReal(bool& value, String attributeName) {
+  String completeName = getCompleteName(attributeName);
+  value = WiFi.iotReadPropertyBool(completeName.c_str());
 }
 
-void ArduinoCloudProperty::iotReadPropertyReal(int& value, String attributeName) {
-  value = WiFi.iotReadPropertyInt(attributeName.c_str());
+void ArduinoCloudPropertyLite::iotReadPropertyReal(int& value, String attributeName) {
+  String completeName = getCompleteName(attributeName);
+  value = WiFi.iotReadPropertyInt(completeName.c_str());
 }
 
-void ArduinoCloudProperty::iotReadPropertyReal(float& value, String attributeName) {
-  value = WiFi.iotReadPropertyFloat(attributeName.c_str());
+void ArduinoCloudPropertyLite::iotReadPropertyReal(float& value, String attributeName) {
+  String completeName = getCompleteName(attributeName);
+  value = WiFi.iotReadPropertyFloat(completeName.c_str());
 }
 
-void ArduinoCloudProperty::iotReadPropertyReal(String& value, String attributeName) {
-  value = WiFi.iotReadPropertyString(attributeName.c_str());
+void ArduinoCloudPropertyLite::iotReadPropertyReal(String& value, String attributeName) {
+  String completeName = getCompleteName(attributeName);
+  value = WiFi.iotReadPropertyString(completeName.c_str());
 }
 
-void ArduinoCloudProperty::iotWriteProperty(){
+void ArduinoCloudPropertyLite::iotWriteProperty(){
   iotWriteProperty();
 }
 
-void ArduinoCloudProperty::iotWritePropertyReal(bool& value, String attributeName) {
-  WiFi.iotWritePropertyBool(attributeName.c_str(), *value);
+void ArduinoCloudPropertyLite::iotWritePropertyReal(bool& value, String attributeName) {
+  String completeName = getCompleteName(attributeName);
+  WiFi.iotWritePropertyBool(completeName.c_str(), *value);
 }
 
-void ArduinoCloudProperty::iotWritePropertyReal(int& value, String attributeName) {
-  WiFi.iotWritePropertyInt(attributeName.c_str(), *value);
+void ArduinoCloudPropertyLite::iotWritePropertyReal(int& value, String attributeName) {
+  String completeName = getCompleteName(attributeName);
+  WiFi.iotWritePropertyInt(completeName.c_str(), *value);
 }
 
-void ArduinoCloudProperty::iotWritePropertyReal(float& value, String attributeName) {
-  WiFi.iotWritePropertyFloat(attributeName.c_str(), *value);
+void ArduinoCloudPropertyLite::iotWritePropertyReal(float& value, String attributeName) {
+  String completeName = getCompleteName(attributeName);
+  WiFi.iotWritePropertyFloat(completeName.c_str(), *value);
 }
 
-void ArduinoCloudProperty::iotReadPropertyReal(String& value, String attributeName) {
-  WiFi.iotWritePropertyString(attributeName.c_str(), *value);
+void ArduinoCloudPropertyLite::iotReadPropertyReal(String& value, String attributeName) {
+  String completeName = getCompleteName(attributeName);
+  WiFi.iotWritePropertyString(completeName.c_str(), *value);
 }
 
 
-bool ArduinoCloudProperty::shouldBeUpdated() {
+bool ArduinoCloudPropertyLite::shouldBeUpdated() {
   if (!_has_been_updated_once) {
     return true;
   }
@@ -143,7 +151,7 @@ bool ArduinoCloudProperty::shouldBeUpdated() {
   }
 }
 
-void ArduinoCloudProperty::execCallbackOnChange() {
+void ArduinoCloudPropertyLite::execCallbackOnChange() {
   if (_update_callback_func != NULL) {
     _update_callback_func();
   }
@@ -152,41 +160,49 @@ void ArduinoCloudProperty::execCallbackOnChange() {
   }
 }
 
-void ArduinoCloudProperty::execCallbackOnSync() {
+void ArduinoCloudPropertyLite::execCallbackOnSync() {
   if (_sync_callback_func != NULL) {
     _sync_callback_func(*this);
   }
 }
 
-String ArduinoCloudProperty::getAttributeName(String propertyName, char separator) {
+String ArduinoCloudPropertyLite::getAttributeName(String propertyName, char separator) {
   int colonPos;
   String attributeName = "";
   (colonPos = propertyName.indexOf(separator)) != -1 ? attributeName = propertyName.substring(colonPos + 1) : "";
   return attributeName;
 }
 
-void ArduinoCloudProperty::updateLocalTimestamp() {
+void ArduinoCloudPropertyLite::updateLocalTimestamp() {
   if (isReadableByCloud()) {
     _last_local_change_timestamp = getTimestamp();
   }
 }
 
-void ArduinoCloudProperty::setLastCloudChangeTimestamp(unsigned long cloudChangeEventTime) {
+void ArduinoCloudPropertyLite::setLastCloudChangeTimestamp(unsigned long cloudChangeEventTime) {
   _last_cloud_change_timestamp = cloudChangeEventTime;
 }
 
-void ArduinoCloudProperty::setLastLocalChangeTimestamp(unsigned long localChangeTime) {
+void ArduinoCloudPropertyLite::setLastLocalChangeTimestamp(unsigned long localChangeTime) {
   _last_local_change_timestamp = localChangeTime;
 }
 
-unsigned long ArduinoCloudProperty::getLastCloudChangeTimestamp() {
+unsigned long ArduinoCloudPropertyLite::getLastCloudChangeTimestamp() {
   return _last_cloud_change_timestamp;
 }
 
-unsigned long ArduinoCloudProperty::getLastLocalChangeTimestamp() {
+unsigned long ArduinoCloudPropertyLite::getLastLocalChangeTimestamp() {
   return _last_local_change_timestamp;
 }
 
-void ArduinoCloudProperty::setIdentifier(int identifier) {
+void ArduinoCloudPropertyLite::setIdentifier(int identifier) {
   _identifier = identifier;
+}
+
+String getCompleteName(String attributeName){
+  String completeName = _name;
+  if (attributeName != "") {
+    completeName += ":" + attributeName;
+  }
+  return completeName;
 }

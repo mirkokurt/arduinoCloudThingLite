@@ -15,14 +15,14 @@
 // a commercial license, send an email to license@arduino.cc.
 //
 
-#ifndef ARDUINO_CLOUD_THING_H_
-#define ARDUINO_CLOUD_THING_H_
+#ifndef ARDUINO_CLOUD_THING_LITE_H_
+#define ARDUINO_CLOUD_THING_LITE_H_
 
 /******************************************************************************
    INCLUDE
  ******************************************************************************/
 
-#include "ArduinoCloudProperty.h"
+#include "ArduinoCloudPropertyLite.h"
 #include "lib/LinkedList/LinkedList.h"
 #include "types/CloudBool.h"
 #include "types/CloudFloat.h"
@@ -60,25 +60,25 @@ static long const DAYS      = 86400;
    SYNCHRONIZATION CALLBACKS
  ******************************************************************************/
 
-void onAutoSync(ArduinoCloudProperty & property);
+void onAutoSync(ArduinoCloudPropertyLite & property);
 #define MOST_RECENT_WINS onAutoSync
-void onForceCloudSync(ArduinoCloudProperty & property);
+void onForceCloudSync(ArduinoCloudPropertyLite & property);
 #define CLOUD_WINS onForceCloudSync
-void onForceDeviceSync(ArduinoCloudProperty & property);
+void onForceDeviceSync(ArduinoCloudPropertyLite & property);
 #define DEVICE_WINS onForceDeviceSync // The device property value is already the correct one. The cloud property value will be synchronized at the next update cycle.
 
 /******************************************************************************
    CLASS DECLARATION
  ******************************************************************************/
 
-class ArduinoCloudThing {
+class ArduinoCloudThingLite {
 
   public:
     ArduinoCloudThing();
 
     void begin();
     //if propertyIdentifier is different from -1, an integer identifier is associated to the added property to be use instead of the property name when the parameter lightPayload is true in the encode method
-    ArduinoCloudProperty   & addPropertyReal(ArduinoCloudProperty   & property, String const & name, Permission const permission, int propertyIdentifier = -1);
+    ArduinoCloudPropertyLite   & addPropertyReal(ArduinoCloudPropertyLite   & property, String const & name, Permission const permission, int propertyIdentifier = -1);
 
     bool isPropertyInContainer(String const & name);
 
@@ -87,20 +87,17 @@ class ArduinoCloudThing {
     String getPropertyNameByIdentifier(int propertyIdentifier);
 
     void readProperties(bool isSyncMessage = false);
-    void writeProperties(bool isSyncMessage = false);
+    void writeProperties();
 
   private:
-    LinkedList<ArduinoCloudProperty *>   _property_list;
+    LinkedList<ArduinoCloudPropertyLite *>   _property_list;
     /* Keep track of the number of primitive properties in the Thing. If 0 it allows the early exit in updateTimestampOnLocallyChangedProperties() */
     int                                  _numPrimitivesProperties;
     int                                  _numProperties;
     /* Indicates the if the message received to be decoded is a response to the getLastValues inquiry */
     bool                                 _isSyncMessage;
-
-    static bool   ifNumericConvertToDouble(CborValue * value_iter, double * numeric_val);
-    static double convertCborHalfFloatToDouble(uint16_t const half_val);
     
-    inline void addProperty(ArduinoCloudProperty   * property_obj, int propertyIdentifier) {
+    inline void addProperty(ArduinoCloudPropertyLite   * property_obj, int propertyIdentifier) {
       if (propertyIdentifier != -1) {
         property_obj->setIdentifier(propertyIdentifier);
       } else {
@@ -109,8 +106,8 @@ class ArduinoCloudThing {
       }
       _property_list.add(property_obj);
     }
-    ArduinoCloudProperty * getProperty(String const & name);
-    ArduinoCloudProperty * getProperty(int const & identifier);
+    ArduinoCloudPropertyLite * getProperty(String const & name);
+    ArduinoCloudPropertyLite * getProperty(int const & identifier);
 
 };
 

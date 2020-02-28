@@ -21,7 +21,7 @@
 
 #include <Arduino.h>
 
-#include <ArduinoCloudThing.h>
+#include <ArduinoCloudThingLite.h>
 
 
 /******************************************************************************
@@ -41,7 +41,7 @@ ArduinoCloudThing::ArduinoCloudThing() :
 void ArduinoCloudThing::begin() {
 }
 
-ArduinoCloudProperty& ArduinoCloudThing::addPropertyReal(ArduinoCloudProperty & property, String const & name, Permission const permission, int propertyIdentifier) {
+ArduinoCloudPropertyLite& ArduinoCloudThingLite::addPropertyReal(ArduinoCloudPropertyLite & property, String const & name, Permission const permission, int propertyIdentifier) {
   property.init(name, permission);
   if (isPropertyInContainer(name)) {
     return (*getProperty(name));
@@ -56,7 +56,7 @@ ArduinoCloudProperty& ArduinoCloudThing::addPropertyReal(ArduinoCloudProperty & 
 
 }
 
-void ArduinoCloudThing::readProperties(bool isSyncMessage) {
+void ArduinoCloudThingLite::readProperties(bool isSyncMessage) {
   _isSyncMessage = isSyncMessage;
   
   for (int i = 0; i < _property_list.size(); i++) {
@@ -66,8 +66,7 @@ void ArduinoCloudThing::readProperties(bool isSyncMessage) {
   }
 }
 
-void ArduinoCloudThing::writeProperties() {
-  _isSyncMessage = isSyncMessage;
+void ArduinoCloudThingLite::writeProperties() {
   
   for (int i = 0; i < _property_list.size(); i++) {
     ArduinoCloudProperty * p = _property_list.get(i);
@@ -75,7 +74,7 @@ void ArduinoCloudThing::writeProperties() {
   }
 }
 
-bool ArduinoCloudThing::isPropertyInContainer(String const & name) {
+bool ArduinoCloudThingLite::isPropertyInContainer(String const & name) {
   for (int i = 0; i < _property_list.size(); i++) {
     ArduinoCloudProperty * p = _property_list.get(i);
     if (p->name() == name) {
@@ -86,7 +85,7 @@ bool ArduinoCloudThing::isPropertyInContainer(String const & name) {
 }
 
 //retrieve property by name
-ArduinoCloudProperty * ArduinoCloudThing::getProperty(String const & name) {
+ArduinoCloudPropertyLite * ArduinoCloudThingLite::getProperty(String const & name) {
   for (int i = 0; i < _property_list.size(); i++) {
     ArduinoCloudProperty * p = _property_list.get(i);
     if (p->name() == name) {
@@ -97,7 +96,7 @@ ArduinoCloudProperty * ArduinoCloudThing::getProperty(String const & name) {
 }
 
 //retrieve property by identifier
-ArduinoCloudProperty * ArduinoCloudThing::getProperty(int const & pos) {
+ArduinoCloudPropertyLite * ArduinoCloudThingLite::getProperty(int const & pos) {
   for (int i = 0; i < _property_list.size(); i++) {
     ArduinoCloudProperty * p = _property_list.get(i);
     if (p->identifier() == pos) {
@@ -108,7 +107,7 @@ ArduinoCloudProperty * ArduinoCloudThing::getProperty(int const & pos) {
 }
 
 // this function updates the timestamps on the primitive properties that have been modified locally since last cloud synchronization
-void ArduinoCloudThing::updateTimestampOnLocallyChangedProperties() {
+void ArduinoCloudThingLite::updateTimestampOnLocallyChangedProperties() {
   if (_numPrimitivesProperties == 0) {
     return;
   } else {
@@ -122,7 +121,7 @@ void ArduinoCloudThing::updateTimestampOnLocallyChangedProperties() {
 }
 
 
-void ArduinoCloudThing::updateProperty(String propertyName, unsigned long cloudChangeEventTime) {
+void ArduinoCloudThingLite::updateProperty(String propertyName, unsigned long cloudChangeEventTime) {
   ArduinoCloudProperty* property = getProperty(propertyName);
   if (property && property->isWriteableByCloud()) {
     property->setLastCloudChangeTimestamp(cloudChangeEventTime);
@@ -137,7 +136,7 @@ void ArduinoCloudThing::updateProperty(String propertyName, unsigned long cloudC
 }
 
 // retrieve the property name by the identifier
-String ArduinoCloudThing::getPropertyNameByIdentifier(int propertyIdentifier) {
+String ArduinoCloudThingLite::getPropertyNameByIdentifier(int propertyIdentifier) {
   ArduinoCloudProperty* property;
   if (propertyIdentifier > 255) {
     property = getProperty(propertyIdentifier & 255);
@@ -147,63 +146,17 @@ String ArduinoCloudThing::getPropertyNameByIdentifier(int propertyIdentifier) {
   return property->name();
 }
 
-bool ArduinoCloudThing::ifNumericConvertToDouble(CborValue * value_iter, double * numeric_val) {
-
-  if (cbor_value_is_integer(value_iter)) {
-    int64_t val = 0;
-    if (cbor_value_get_int64(value_iter, &val) == CborNoError) {
-      *numeric_val = static_cast<double>(val);
-      return true;
-    }
-  } else if (cbor_value_is_double(value_iter)) {
-    double val = 0.0;
-    if (cbor_value_get_double(value_iter, &val) == CborNoError) {
-      *numeric_val = val;
-      return true;
-    }
-  } else if (cbor_value_is_float(value_iter)) {
-    float val = 0.0;
-    if (cbor_value_get_float(value_iter, &val) == CborNoError) {
-      *numeric_val = static_cast<double>(val);
-      return true;
-    }
-  } else if (cbor_value_is_half_float(value_iter)) {
-    uint16_t val = 0;
-    if (cbor_value_get_half_float(value_iter, &val) == CborNoError) {
-      *numeric_val = static_cast<double>(convertCborHalfFloatToDouble(val));
-      return true;
-    }
-  }
-
-  return false;
-}
-
-/* Source Idea from https://tools.ietf.org/html/rfc7049 : Page: 50 */
-double ArduinoCloudThing::convertCborHalfFloatToDouble(uint16_t const half_val) {
-  int exp = (half_val >> 10) & 0x1f;
-  int mant = half_val & 0x3ff;
-  double val;
-  if (exp == 0) {
-    val = ldexp(mant, -24);
-  } else if (exp != 31) {
-    val = ldexp(mant + 1024, exp - 25);
-  } else {
-    val = mant == 0 ? INFINITY : NAN;
-  }
-  return half_val & 0x8000 ? -val : val;
-}
-
-void onAutoSync(ArduinoCloudProperty & property) {
+void onAutoSync(ArduinoCloudPropertyLite & property) {
   if (property.getLastCloudChangeTimestamp() > property.getLastLocalChangeTimestamp()) {
     property.fromCloudToLocal();
     property.execCallbackOnChange();
   }
 }
 
-void onForceCloudSync(ArduinoCloudProperty & property) {
+void onForceCloudSync(ArduinoCloudPropertyLite & property) {
   property.fromCloudToLocal();
   property.execCallbackOnChange();
 }
 
-void onForceDeviceSync(ArduinoCloudProperty & /* property */) {
+void onForceDeviceSync(ArduinoCloudPropertyLite & /* property */) {
 }

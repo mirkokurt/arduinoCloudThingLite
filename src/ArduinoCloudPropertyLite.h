@@ -15,13 +15,8 @@
 // a commercial license, send an email to license@arduino.cc.
 //
 
-#ifndef ARDUINO_CLOUD_PROPERTY_HPP_
-#define ARDUINO_CLOUD_PROPERTY_HPP_
-
-#ifdef HOST_BUILD
-  #define substring(...) substr(__VA_ARGS__)
-  #define indexOf(x) find(x)
-#endif
+#ifndef ARDUINO_CLOUD_PROPERTY_LITE_H_
+#define ARDUINO_CLOUD_PROPERTY_LITE_H_
 
 /******************************************************************************
    INCLUDE
@@ -60,8 +55,8 @@ typedef void(*UpdateCallbackFunc)(void);
    CLASS DECLARATION
  ******************************************************************************/
 
-class ArduinoCloudProperty {
-    typedef void(*SyncCallbackFunc)(ArduinoCloudProperty &property);
+class ArduinoCloudPropertyLite {
+    typedef void(*SyncCallbackFunc)(ArduinoCloudPropertyLite &property);
   public:
     ArduinoCloudProperty();
     void init(String const name, Permission const permission);
@@ -142,7 +137,9 @@ class ArduinoCloudProperty {
     /* Store the identifier of the property in the array list */
     int                _identifier;
     int                _attributeIdentifier;
-    
+
+    String getCompleteName(String attributeName);
+
 };
 
 /******************************************************************************
