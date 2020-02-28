@@ -47,9 +47,8 @@ ArduinoCloudPropertyLite::ArduinoCloudPropertyLite()
       _update_interval_millis(0),
       _last_local_change_timestamp(0),
       _last_cloud_change_timestamp(0),
-      _map_data_list(nullptr),
       _identifier(0),
-      _attributeIdentifier(0)
+      _attributeIdentifier(0){
 }
 
 /******************************************************************************
@@ -83,7 +82,7 @@ ArduinoCloudPropertyLite & ArduinoCloudPropertyLite::publishEvery(unsigned long 
   return (*this);
 }
 
-void ArduinoCloudPropertyLite::iotReadProperty(){
+void ArduinoCloudPropertyLite::iotReadPropertyFromCloud(){
   iotReadProperty();
 }
 
@@ -107,28 +106,28 @@ void ArduinoCloudPropertyLite::iotReadPropertyReal(String& value, String attribu
   value = WiFi.iotReadPropertyString(completeName.c_str());
 }
 
-void ArduinoCloudPropertyLite::iotWriteProperty(){
+void ArduinoCloudPropertyLite::iotWritePropertyToCloud(){
   iotWriteProperty();
 }
 
 void ArduinoCloudPropertyLite::iotWritePropertyReal(bool& value, String attributeName) {
   String completeName = getCompleteName(attributeName);
-  WiFi.iotWritePropertyBool(completeName.c_str(), *value);
+  WiFi.iotWritePropertyBool(completeName.c_str(), value);
 }
 
 void ArduinoCloudPropertyLite::iotWritePropertyReal(int& value, String attributeName) {
   String completeName = getCompleteName(attributeName);
-  WiFi.iotWritePropertyInt(completeName.c_str(), *value);
+  WiFi.iotWritePropertyInt(completeName.c_str(), value);
 }
 
 void ArduinoCloudPropertyLite::iotWritePropertyReal(float& value, String attributeName) {
   String completeName = getCompleteName(attributeName);
-  WiFi.iotWritePropertyFloat(completeName.c_str(), *value);
+  WiFi.iotWritePropertyFloat(completeName.c_str(), value);
 }
 
-void ArduinoCloudPropertyLite::iotReadPropertyReal(String& value, String attributeName) {
+void ArduinoCloudPropertyLite::iotWritePropertyReal(String& value, String attributeName) {
   String completeName = getCompleteName(attributeName);
-  WiFi.iotWritePropertyString(completeName.c_str(), *value);
+  WiFi.iotWritePropertyString(completeName.c_str(), value);
 }
 
 
@@ -199,7 +198,7 @@ void ArduinoCloudPropertyLite::setIdentifier(int identifier) {
   _identifier = identifier;
 }
 
-String getCompleteName(String attributeName){
+String ArduinoCloudPropertyLite::getCompleteName(String attributeName){
   String completeName = _name;
   if (attributeName != "") {
     completeName += ":" + attributeName;

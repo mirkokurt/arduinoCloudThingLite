@@ -23,7 +23,7 @@
  ******************************************************************************/
 
 #include <Arduino.h>
-#include "../ArduinoCloudProperty.h"
+#include "../ArduinoCloudPropertyLite.h"
 
 /******************************************************************************
    CLASS DECLARATION
@@ -31,7 +31,7 @@
 
 
 
-class CloudString : public ArduinoCloudProperty {
+class CloudString : public ArduinoCloudPropertyLite {
   private:
     String  _value,
             _cloud_value;
@@ -58,8 +58,8 @@ class CloudString : public ArduinoCloudProperty {
     virtual void iotReadProperty() {
       readProperty(_cloud_value);
     }
-    virtual void iotUpdateProperty() {
-      updateProperty(_value);
+    virtual void iotWriteProperty() {
+      writeProperty(_value);
     }
     //modifiers
     CloudString& operator=(String v) {

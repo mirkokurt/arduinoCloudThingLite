@@ -24,6 +24,8 @@
 
 
 #include <Arduino.h>
+#include <WiFiNINA.h>
+
 // in order to allow <functional> to define its own max and min functions
 #undef max
 #undef min
@@ -31,9 +33,6 @@
 
 #include "lib/LinkedList/LinkedList.h"
 
-#define appendAttributesToCloud() appendAttributesToCloudReal(CborEncoder *encoder)
-#define appendAttribute(x) appendAttributeReal(x, getAttributeName(#x, '.'), encoder)
-#define setAttribute(x) setAttributeReal(x, getAttributeName(#x, '.'))
 #define readProperty(x) iotReadPropertyReal(x, getAttributeName(#x, '.'))
 #define writeProperty(x) iotWritePropertyReal(x, getAttributeName(#x, '.'))
 
@@ -58,14 +57,14 @@ typedef void(*UpdateCallbackFunc)(void);
 class ArduinoCloudPropertyLite {
     typedef void(*SyncCallbackFunc)(ArduinoCloudPropertyLite &property);
   public:
-    ArduinoCloudProperty();
+    ArduinoCloudPropertyLite();
     void init(String const name, Permission const permission);
 
     /* Composable configuration of the ArduinoCloudProperty class */
-    ArduinoCloudProperty & onUpdate(UpdateCallbackFunc func);
-    ArduinoCloudProperty & onSync(SyncCallbackFunc func);
-    ArduinoCloudProperty & publishOnChange(float const min_delta_property, unsigned long const min_time_between_updates_millis = 0);
-    ArduinoCloudProperty & publishEvery(unsigned long const seconds);
+    ArduinoCloudPropertyLite & onUpdate(UpdateCallbackFunc func);
+    ArduinoCloudPropertyLite & onSync(SyncCallbackFunc func);
+    ArduinoCloudPropertyLite & publishOnChange(float const min_delta_property, unsigned long const min_time_between_updates_millis = 0);
+    ArduinoCloudPropertyLite & publishEvery(unsigned long const seconds);
 
     inline String name() const {
       return _name;
@@ -81,18 +80,21 @@ class ArduinoCloudPropertyLite {
     }
 
     //read from NINA
-    void iotReadProperty() = 0;
+    void iotReadPropertyFromCloud();
+    virtual void iotReadProperty() = 0;
     void iotReadPropertyReal(bool& value, String attributeName = "");
     void iotReadPropertyReal(int& value, String attributeName = "");
     void iotReadPropertyReal(float& value, String attributeName = "");
     void iotReadPropertyReal(String& value, String attributeName = "");
 
     //write to NINA
-    void iotWriteProperty() = 0;
+    void iotWritePropertyToCloud();
+    virtual void iotWriteProperty() = 0;
     void iotWritePropertyReal(bool& value, String attributeName = "");
     void iotWritePropertyReal(int& value, String attributeName = "");
     void iotWritePropertyReal(float& value, String attributeName = "");
     void iotWritePropertyReal(String& value, String attributeName = "");
+    String getAttributeName(String propertyName, char separator);
 
     bool shouldBeUpdated();
     void execCallbackOnChange();
@@ -108,8 +110,6 @@ class ArduinoCloudPropertyLite {
     virtual bool isDifferentFromCloud() = 0;
     virtual void fromCloudToLocal() = 0;
     virtual void fromLocalToCloud() = 0;
-    virtual void appendAttributesToCloudReal(CborEncoder *encoder) = 0;
-    virtual void setAttributesFromCloud() = 0;
     virtual bool isPrimitive() {
       return false;
     };
@@ -122,7 +122,7 @@ class ArduinoCloudPropertyLite {
   private:
     Permission         _permission;
     UpdateCallbackFunc _update_callback_func;
-    void (*_sync_callback_func)(ArduinoCloudProperty &property);
+    void (*_sync_callback_func)(ArduinoCloudPropertyLite &property);
 
     UpdatePolicy       _update_policy;
     bool               _has_been_updated_once,
@@ -133,7 +133,7 @@ class ArduinoCloudPropertyLite {
     /* Variables used for reconnection sync*/
     unsigned long      _last_local_change_timestamp;
     unsigned long      _last_cloud_change_timestamp;
-    LinkedList<CborMapData *> * _map_data_list;
+
     /* Store the identifier of the property in the array list */
     int                _identifier;
     int                _attributeIdentifier;
@@ -146,8 +146,10 @@ class ArduinoCloudPropertyLite {
    PROTOTYPE FREE FUNCTIONs
  ******************************************************************************/
 
-inline bool operator == (ArduinoCloudProperty const & lhs, ArduinoCloudProperty const & rhs) {
+inline bool operator == (ArduinoCloudPropertyLite const & lhs, ArduinoCloudPropertyLite const & rhs) {
   return (lhs.name() == rhs.name());
 }
+
+extern WiFiClass WiFi;
 
 #endif /* ARDUINO_CLOUD_PROPERTY_HPP_ */

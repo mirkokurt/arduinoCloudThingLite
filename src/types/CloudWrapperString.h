@@ -49,17 +49,17 @@ class CloudWrapperString : public CloudWrapperBase {
     virtual void fromLocalToCloud() {
       _cloud_value = _primitive_value;
     }
-    virtual void appendAttributesToCloud() {
-      appendAttribute(_primitive_value);
-    }
-    virtual void setAttributesFromCloud() {
-      setAttribute(_cloud_value);
-    }
     virtual bool isPrimitive() {
       return true;
     }
     virtual bool isChangedLocally() {
       return _primitive_value != _local_value;
+    }
+    virtual void iotReadProperty() {
+      readProperty(_cloud_value);
+    }
+    virtual void iotWriteProperty() {
+      writeProperty(_primitive_value);
     }
 };
 

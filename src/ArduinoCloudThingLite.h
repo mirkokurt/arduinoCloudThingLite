@@ -74,7 +74,7 @@ void onForceDeviceSync(ArduinoCloudPropertyLite & property);
 class ArduinoCloudThingLite {
 
   public:
-    ArduinoCloudThing();
+    ArduinoCloudThingLite();
 
     void begin();
     //if propertyIdentifier is different from -1, an integer identifier is associated to the added property to be use instead of the property name when the parameter lightPayload is true in the encode method

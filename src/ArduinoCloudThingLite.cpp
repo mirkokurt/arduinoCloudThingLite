@@ -28,7 +28,7 @@
    CTOR/DTOR
  ******************************************************************************/
 
-ArduinoCloudThing::ArduinoCloudThing() :
+ArduinoCloudThingLite::ArduinoCloudThingLite() :
   _numPrimitivesProperties(0),
   _numProperties(0),
   _isSyncMessage(false)
@@ -38,7 +38,7 @@ ArduinoCloudThing::ArduinoCloudThing() :
    PUBLIC MEMBER FUNCTIONS
  ******************************************************************************/
 
-void ArduinoCloudThing::begin() {
+void ArduinoCloudThingLite::begin() {
 }
 
 ArduinoCloudPropertyLite& ArduinoCloudThingLite::addPropertyReal(ArduinoCloudPropertyLite & property, String const & name, Permission const permission, int propertyIdentifier) {
@@ -60,7 +60,7 @@ void ArduinoCloudThingLite::readProperties(bool isSyncMessage) {
   _isSyncMessage = isSyncMessage;
   
   for (int i = 0; i < _property_list.size(); i++) {
-    ArduinoCloudProperty * p = _property_list.get(i);
+    ArduinoCloudPropertyLite * p = _property_list.get(i);
     p->iotReadProperty();
     updateProperty(p->name(),0);
   }
@@ -69,14 +69,14 @@ void ArduinoCloudThingLite::readProperties(bool isSyncMessage) {
 void ArduinoCloudThingLite::writeProperties() {
   
   for (int i = 0; i < _property_list.size(); i++) {
-    ArduinoCloudProperty * p = _property_list.get(i);
+    ArduinoCloudPropertyLite * p = _property_list.get(i);
     p->iotWriteProperty();
   }
 }
 
 bool ArduinoCloudThingLite::isPropertyInContainer(String const & name) {
   for (int i = 0; i < _property_list.size(); i++) {
-    ArduinoCloudProperty * p = _property_list.get(i);
+    ArduinoCloudPropertyLite * p = _property_list.get(i);
     if (p->name() == name) {
       return true;
     }
@@ -87,7 +87,7 @@ bool ArduinoCloudThingLite::isPropertyInContainer(String const & name) {
 //retrieve property by name
 ArduinoCloudPropertyLite * ArduinoCloudThingLite::getProperty(String const & name) {
   for (int i = 0; i < _property_list.size(); i++) {
-    ArduinoCloudProperty * p = _property_list.get(i);
+    ArduinoCloudPropertyLite * p = _property_list.get(i);
     if (p->name() == name) {
       return p;
     }
@@ -98,7 +98,7 @@ ArduinoCloudPropertyLite * ArduinoCloudThingLite::getProperty(String const & nam
 //retrieve property by identifier
 ArduinoCloudPropertyLite * ArduinoCloudThingLite::getProperty(int const & pos) {
   for (int i = 0; i < _property_list.size(); i++) {
-    ArduinoCloudProperty * p = _property_list.get(i);
+    ArduinoCloudPropertyLite * p = _property_list.get(i);
     if (p->identifier() == pos) {
       return p;
     }
@@ -122,10 +122,9 @@ void ArduinoCloudThingLite::updateTimestampOnLocallyChangedProperties() {
 
 
 void ArduinoCloudThingLite::updateProperty(String propertyName, unsigned long cloudChangeEventTime) {
-  ArduinoCloudProperty* property = getProperty(propertyName);
+  ArduinoCloudPropertyLite* property = getProperty(propertyName);
   if (property && property->isWriteableByCloud()) {
     property->setLastCloudChangeTimestamp(cloudChangeEventTime);
-    property->setAttributesFromCloud(&_map_data_list);
     if (_isSyncMessage) {
       property->execCallbackOnSync();
     } else {
@@ -137,7 +136,7 @@ void ArduinoCloudThingLite::updateProperty(String propertyName, unsigned long cl
 
 // retrieve the property name by the identifier
 String ArduinoCloudThingLite::getPropertyNameByIdentifier(int propertyIdentifier) {
-  ArduinoCloudProperty* property;
+  ArduinoCloudPropertyLite* property;
   if (propertyIdentifier > 255) {
     property = getProperty(propertyIdentifier & 255);
   } else {

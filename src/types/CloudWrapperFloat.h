@@ -39,7 +39,7 @@ class CloudWrapperFloat : public CloudWrapperBase {
   public:
     CloudWrapperFloat(float& v) : _primitive_value(v), _cloud_value(v), _local_value(v) {}
     virtual bool isDifferentFromCloud() {
-      return _primitive_value != _cloud_value && (abs(_primitive_value - _cloud_value) >= ArduinoCloudProperty::_min_delta_property);
+      return _primitive_value != _cloud_value && (abs(_primitive_value - _cloud_value) >= ArduinoCloudPropertyLite::_min_delta_property);
     }
     virtual void fromCloudToLocal() {
       _primitive_value = _cloud_value;
@@ -47,17 +47,17 @@ class CloudWrapperFloat : public CloudWrapperBase {
     virtual void fromLocalToCloud() {
       _cloud_value = _primitive_value;
     }
-    virtual void appendAttributesToCloud() {
-      appendAttribute(_primitive_value);
-    }
-    virtual void setAttributesFromCloud() {
-      setAttribute(_cloud_value);
-    }
     virtual bool isPrimitive() {
       return true;
     }
     virtual bool isChangedLocally() {
       return _primitive_value != _local_value;
+    }
+    virtual void iotReadProperty() {
+      readProperty(_cloud_value);
+    }
+    virtual void iotWriteProperty() {
+      writeProperty(_primitive_value);
     }
 };
 

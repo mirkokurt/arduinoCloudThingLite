@@ -23,7 +23,7 @@
  ******************************************************************************/
 
 #include <Arduino.h>
-#include "../ArduinoCloudProperty.h"
+#include "../ArduinoCloudPropertyLite.h"
 
 /******************************************************************************
    CLASS DECLARATION
@@ -31,7 +31,7 @@
 
 
 
-class CloudBool : public ArduinoCloudProperty {
+class CloudBool : public ArduinoCloudPropertyLite {
   protected:
     bool  _value,
           _cloud_value;
@@ -55,8 +55,8 @@ class CloudBool : public ArduinoCloudProperty {
     virtual void iotReadProperty() {
       readProperty(_cloud_value);
     }
-    virtual void iotUpdateProperty() {
-      updateProperty(_value);
+    virtual void iotWriteProperty() {
+      writeProperty(_value);
     }
 
     //modifiers
