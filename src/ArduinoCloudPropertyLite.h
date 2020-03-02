@@ -26,11 +26,6 @@
 #include <Arduino.h>
 #include <WiFiNINA.h>
 
-// in order to allow <functional> to define its own max and min functions
-#undef max
-#undef min
-#include <functional>
-
 #include "lib/LinkedList/LinkedList.h"
 
 #define readProperty(x) iotReadPropertyReal(x, getAttributeName(#x, '.'))
