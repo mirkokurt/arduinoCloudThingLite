@@ -128,8 +128,10 @@ void ArduinoCloudThingLite::updateProperty(String propertyName, unsigned long cl
     if (_isSyncMessage) {
       property->execCallbackOnSync();
     } else {
-      property->fromCloudToLocal();
-      property->execCallbackOnChange();
+      if(property->isDifferentFromCloud()){
+        property->fromCloudToLocal();
+        property->execCallbackOnChange();
+      }
     }
   }
 }
