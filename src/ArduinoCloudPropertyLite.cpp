@@ -88,22 +88,22 @@ void ArduinoCloudPropertyLite::iotReadPropertyFromCloud(){
 
 void ArduinoCloudPropertyLite::iotReadPropertyReal(bool& value, String attributeName) {
   String completeName = getCompleteName(attributeName);
-  value = WiFi.iotReadPropertyBool(completeName.c_str());
+  WiFi.iotReadPropertyBool(completeName.c_str(), &value, &_last_cloud_change_timestamp);
 }
 
 void ArduinoCloudPropertyLite::iotReadPropertyReal(int& value, String attributeName) {
   String completeName = getCompleteName(attributeName);
-  value = WiFi.iotReadPropertyInt(completeName.c_str());
+  WiFi.iotReadPropertyInt(completeName.c_str(), &value, &_last_cloud_change_timestamp);
 }
 
 void ArduinoCloudPropertyLite::iotReadPropertyReal(float& value, String attributeName) {
   String completeName = getCompleteName(attributeName);
-  value = WiFi.iotReadPropertyFloat(completeName.c_str());
+  WiFi.iotReadPropertyFloat(completeName.c_str(), &value, &_last_cloud_change_timestamp);
 }
 
 void ArduinoCloudPropertyLite::iotReadPropertyReal(String& value, String attributeName) {
   String completeName = getCompleteName(attributeName);
-  value = WiFi.iotReadPropertyString(completeName.c_str());
+  WiFi.iotReadPropertyString(completeName.c_str(), &value, &_last_cloud_change_timestamp);
 }
 
 void ArduinoCloudPropertyLite::iotWritePropertyToCloud(){
