@@ -24,7 +24,7 @@
 
 
 #include <Arduino.h>
-#include <WiFiNINA.h>
+#include <WiFiNINALite.h>
 
 #include "lib/LinkedList/LinkedList.h"
 
@@ -145,6 +145,6 @@ inline bool operator == (ArduinoCloudPropertyLite const & lhs, ArduinoCloudPrope
   return (lhs.name() == rhs.name());
 }
 
-extern WiFiClass WiFi;
+extern WiFiLiteClass WiFiLite;
 
 #endif /* ARDUINO_CLOUD_PROPERTY_HPP_ */
